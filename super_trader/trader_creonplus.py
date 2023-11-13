@@ -22,3 +22,12 @@ class CreonPlusTrader(SuperTrader):
         self.cpTdUtil.TradeInit()
         self.acc = self.cpTdUtil.AccountNumber[0]
         self.accFlag = self.cpTdUtil.GoodsList(self.acc, 1)
+        
+    def check_system(self):
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            raise Exception('check_creon_system() : admin user -> FAILED')
+        if (self.cpCybos.IsConnect == 0):
+            raise Exception('check_creon_system() : connect to server -> FAILED')
+        if (self.cpTdUtil.TradeInit(0) != 0):
+            raise Exception('check_creon_system() : init trade -> FAILED')
+        self.send_msg('check_creon_system...OK')
