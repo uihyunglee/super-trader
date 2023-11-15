@@ -89,3 +89,13 @@ class CreonPlusTrader(SuperTrader):
         self.cpCash.SetInputValue(1, self.accFlag[0])
         self.cpCash.BlockRequest()
         return self.cpCash.GetHeaderValue(9)
+    
+    def get_cur_total_asset(self):
+        self.cpTdUtil.TradeInit()
+        self.cpBalance.SetInputValue(0, self.acc)
+        self.cpBalance.SetInputValue(1, self.accFlag[0])
+        self.cpBalance.SetInputValue(2, 50)
+        self.cpBalance.SetInputValue(3, '2')
+        self.cpBalance.BlockRequest()
+        total_asset = self.cpBalance.GetHeaderValue(3)
+        return total_asset
