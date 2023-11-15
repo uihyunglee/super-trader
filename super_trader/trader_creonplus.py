@@ -82,3 +82,10 @@ class CreonPlusTrader(SuperTrader):
             return stocks
         else:
             return code, 0
+    
+    def get_cur_cash(self):
+        self.cpTdUtil.TradeInit()
+        self.cpCash.SetInputValue(0, self.acc)
+        self.cpCash.SetInputValue(1, self.accFlag[0])
+        self.cpCash.BlockRequest()
+        return self.cpCash.GetHeaderValue(9)
