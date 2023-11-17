@@ -119,3 +119,10 @@ class CreonPlusTrader(SuperTrader):
                     cur_data = self.cpStockMstM.GetDataValue(type_dict[pt],i)
                     cur_info_dict[code].update({pt:cur_data})
         return pd.DataFrame(cur_info_dict).T
+    
+    def get_trad_price(self, cur_price_df, td_type, tic=1):
+        if td_type == 'buy':
+            df = cur_price_df.apply(lambda p: p - (self.cpStockCode.GetPriceUnit(p.index, p) * tic), axis=1)
+        elif td_type == 'sell':
+            df = cur_price_df.apply(lambda p: p + (self.cpStockCode.GetPriceUnit(p.index, p) * tic), axis=1)
+        return df
