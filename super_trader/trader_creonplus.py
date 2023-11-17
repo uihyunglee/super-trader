@@ -99,3 +99,23 @@ class CreonPlusTrader(SuperTrader):
         self.cpBalance.BlockRequest()
         total_asset = self.cpBalance.GetHeaderValue(3)
         return total_asset
+    
+    def get_cur_price(self, codes, price_type=['price']):
+        codes = codes.copy()
+        type_dict = {'price':4,'ask':5,'bid':6,'vol':7}
+        cur_info_dict = {}
+        while len(codes):
+            codes_str = ''.join(codes[:110])
+            codes = codes[110:]
+
+            self.cpStockMstM.SetInputValue(0, codes_str)  # max: 110
+            self.cpStockMstM.BlockRequest()
+
+            data_len = self.cpStockMstM.GetHeaderValue(0)
+            for i in range(data_len):
+                code = self.cpStockMstM.GetDataValue(0,i)
+                cur_info_dict[code] = {}
+                for pt in price_type:
+                    cur_data = self.cpStockMstM.GetDataValue(type_dict[pt],i)
+                    cur_info_dict[code].update({pt:cur_data})
+        return pd.DataFrame(cur_info_dict).T
