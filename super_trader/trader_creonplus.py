@@ -160,3 +160,37 @@ class CreonPlusTrader(SuperTrader):
                 
         except Exception as e:
             self.send_msg(f'buy({code}, {price}, {qty}) exception! -> {e}', log_level='error', slack=True)
+    
+    def sell(self, code, price, qty):
+        try:
+            self.cpTdUtil.TradeInit()
+            
+            self.cpOrder.SetInputValue(0, "1")
+            self.cpOrder.SetInputValue(1, self.acc)
+            self.cpOrder.SetInputValue(2, self.accFlag[0])
+            self.cpOrder.SetInputValue(3, code)
+            self.cpOrder.SetInputValue(4, qty)
+            if price == 'market':
+                self.cpOrder.SetInputValue(8, "03")
+            else:
+                self.cpOrder.SetInputValue(5, price)
+                self.cpOrder.SetInputValue(8, "01")
+            
+            rq = self.cpOrder.BlockRequest()
+            self.send_msg(f'매도 주문 요청: [{code}, {price}, {qty}]-> {rq}', log_level='info', slack=True)
+            dibstatus = self.cpOrder.GetDibStatus()
+            self.send_msg(f'통신상태: {dibstatus} {self.cpOrder.GetDibMsg1()}')
+            
+            if (rq == 0) and (dibstatus == 0):
+                self.send_msg(f'매도 주문 정상 처리: [{code}, {price}, {qty}]-> {rq}', log_level='debug', slack=False)
+                return True
+            elif rq == 4: # 주문요청제한초과
+                self.send_msg(f'매도 주문 제한: [{code}, {price}, {qty}]-> {rq}', log_level='debug', slack=False)
+                remain_time = self.cpCybos.LimitRequestRemainTime
+                time.sleep(remain_time/1000)
+                return self.buy(code, price, qty)
+            else:
+                return False
+                
+        except Exception as e:
+            self.send_msg(f'sell({code}, {price}, {qty}) exception! -> {e}', log_level='error', slack=True)
