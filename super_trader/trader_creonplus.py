@@ -194,3 +194,11 @@ class CreonPlusTrader(SuperTrader):
                 
         except Exception as e:
             self.send_msg(f'sell({code}, {price}, {qty}) exception! -> {e}', log_level='error', slack=True)
+
+    def sell_all(self):
+        holding_stocks = self.get_stock_balance('all')
+        for stock in holding_stocks:
+            self.sell(stock['code'], 'market', stock['qty'])
+        while self.get_stock_balance('all'):
+            time.sleep(1)
+        self.send_msg('Sell all holding stocks...OK', slack=True)
