@@ -61,7 +61,7 @@ class SuperTrader(metaclass=ABCMeta):
                 msg = 'Slack message sending failed. Please check info_slack.'
                 self.send_msg(msg, log_level='warning', slack=False)
                 
-    def system_exit(self):
+    def exit_system(self):
         self.send_msg('Exit the program.', log_level='info', slack=True)
         sys.exit(0)
         
@@ -79,7 +79,7 @@ class SuperTrader(metaclass=ABCMeta):
         
         if is_weekend or is_holiday:
             self.send_msg('Today is Closed day.')
-            self.system_exit()
+            self.exit_system()
         else:
             self.send_msg('check_market_open...OK', slack=True)
     
