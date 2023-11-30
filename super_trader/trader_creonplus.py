@@ -188,7 +188,7 @@ class CreonPlusTrader(SuperTrader):
                 self.send_msg(f'매도 주문 제한: [{code}, {price}, {qty}]-> {rq}', log_level='debug', slack=False)
                 remain_time = self.cpCybos.LimitRequestRemainTime
                 time.sleep(remain_time/1000)
-                return self.buy(code, price, qty)
+                return self.sell(code, price, qty)
             else:
                 return False
                 
