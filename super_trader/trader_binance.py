@@ -68,4 +68,7 @@ class BinanceTrader(SuperTrader):
         total_usdt = balance_usdt['total']
         return float(total_usdt)
     
-    
+    def get_holding_position(self, symbol):
+        positions = self.exchange.fetch_positions(symbols=[symbol])
+        amount = positions[0]['info']['positionAmt']  # 추후 여러 자산 투자 시 변경
+        return float(amount)
