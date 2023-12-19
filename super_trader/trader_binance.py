@@ -1,11 +1,8 @@
 import json
 import os
 import time
-from datetime import datetime as dt
-from datetime import timedelta as td
 
 import ccxt
-import requests
 
 from super_trader import SuperTrader
 
