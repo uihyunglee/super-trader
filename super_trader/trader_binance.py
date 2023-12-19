@@ -61,3 +61,11 @@ class BinanceTrader(SuperTrader):
         symbol_price = self.exchange.fetch_ticker(symbol)
         cur_price = symbol_price['last']
         return cur_price
+    
+    def get_total_usdt(self):
+        balance = self.exchange.fetch_balance(params={'type': 'future' if self.is_future else 'spot'})
+        balance_usdt = balance['USDT']
+        total_usdt = balance_usdt['total']
+        return float(total_usdt)
+    
+    
