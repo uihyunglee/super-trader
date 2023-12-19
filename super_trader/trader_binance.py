@@ -100,3 +100,11 @@ class BinanceTrader(SuperTrader):
         order_info = self.get_order_info(order)
         self.check_order_completion(symbol)
         return order_info
+    
+    def end_all_position(self, symbol):
+        prev_qty = self.get_holding_position(symbol)
+        self.send_msg(f'end_all_position -> prev_qty: {prev_qty}')
+        if prev_qty != 0:
+            self.execute_order(self, symbol, -prev_qty)
+        self.send_msg(f'end_all_position...OK')
+        
