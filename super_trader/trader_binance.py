@@ -90,3 +90,10 @@ class BinanceTrader(SuperTrader):
         info_lst = [ order['info'][col] for col in info_col]
         self.send_msg(f'get_order_info -> {info_lst}')
         return info_lst
+    
+    def check_order_completion(self, symbol):
+        while True:
+            time.sleep(0.1)
+            if len(self.exchange.fetch_open_orders(symbol)) == 0:
+                self.send_msg(f'check_order_completion...OK')
+                return True
