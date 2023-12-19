@@ -11,6 +11,9 @@ from super_trader import SuperTrader
 
 
 class BinanceTrader(SuperTrader):
+    def __init__(self, is_spot=True):
+        self.exchange = self.get_binance_broker(is_spot)
+        self.send_msg(f'set_binance_broker(is_spot={is_spot})', slack=True)
 
     def read_api_key(self):
         config_path = os.path.join(os.getcwd(), "config.json")
@@ -28,3 +31,15 @@ class BinanceTrader(SuperTrader):
                 raise ValueError("config.json must contain 'binance' key.")
         else:
             raise FileNotFoundError("config.json must exist in the path. ")
+        
+    def get_binance_broker(self, is_spot):
+        binance_info = self.read_api_key()
+        exchange = ccxt.binance(config={
+            'apiKey': binance_info["api_key"], 
+            'secret': binance_info["secret"],
+            'enableRateLimit': True,
+            'options': {
+                'defaultType': 'spot' if is_spot else 'future'
+            }
+        })
+        return exchange
