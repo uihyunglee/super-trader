@@ -84,3 +84,9 @@ class BinanceTrader(SuperTrader):
             amount=qty
         )
         return order
+    
+    def get_order_info(self, order):
+        info_col = ['updateTime', 'orderId', 'type', 'side', 'symbol', 'avgPrice', 'price', 'origQty', 'executedQty']
+        info_lst = [ order['info'][col] for col in info_col]
+        self.send_msg(f'get_order_info -> {info_lst}')
+        return info_lst
