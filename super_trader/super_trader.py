@@ -83,17 +83,14 @@ class SuperTrader(metaclass=ABCMeta):
         else:
             self.send_msg('check_market_open...OK', slack=True)
     
-    @abstractmethod
     def check_system(self):
         """시스템 체크하여 문제 있으면 에러 발생 후 종료"""
         pass
     
-    @abstractmethod
     def buy(self, code, price, qty):
         """price='market'으로 시장가 매수"""
         pass
     
-    @abstractmethod
     def sell(self, code, price, qty):
         """price='market'으로 시장가 매도"""
         pass
