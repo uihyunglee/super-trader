@@ -12,8 +12,9 @@ from super_trader import SuperTrader
 
 class BinanceTrader(SuperTrader):
     def __init__(self, is_spot=True):
+        super().__init__()
         self.exchange = self.get_binance_broker(is_spot)
-        self.send_msg(f'set_binance_broker(is_spot={is_spot})', slack=True)
+        self.send_msg(f'set_binance_broker(is_spot={is_spot})...OK', slack=True)
 
     def read_api_key(self):
         config_path = os.path.join(os.getcwd(), "config.json")
@@ -43,3 +44,14 @@ class BinanceTrader(SuperTrader):
             }
         })
         return exchange
+    
+    def check_market_open(self):
+        self.send_msg('check_market_open...OK', slack=True)  # The binance market is always opend.
+    
+    def check_system(self):
+        try:
+            ccxt.binance().fetch_ticker('BTC/USDT')
+            self.send_msg('check_system...OK', slack=True)
+        except Exception as e:
+            self.send_msg('check_system...FAILED', log_level='warning', slack=True)
+            raise Exception(str(e))
