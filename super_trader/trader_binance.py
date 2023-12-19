@@ -11,10 +11,10 @@ from super_trader import SuperTrader
 
 
 class BinanceTrader(SuperTrader):
-    def __init__(self, is_spot=True):
+    def __init__(self, is_future=False):
         super().__init__()
-        self.exchange = self.get_binance_broker(is_spot)
-        self.send_msg(f'set_binance_broker(is_spot={is_spot})...OK', slack=True)
+        self.exchange = self.get_binance_broker(is_future)
+        self.send_msg(f'set_binance_broker(is_spot={is_future})...OK', slack=True)
 
     def read_api_key(self):
         config_path = os.path.join(os.getcwd(), "config.json")
@@ -33,14 +33,14 @@ class BinanceTrader(SuperTrader):
         else:
             raise FileNotFoundError("config.json must exist in the path. ")
         
-    def get_binance_broker(self, is_spot):
+    def get_binance_broker(self, is_future):
         binance_info = self.read_api_key()
         exchange = ccxt.binance(config={
             'apiKey': binance_info["api_key"], 
             'secret': binance_info["secret"],
             'enableRateLimit': True,
             'options': {
-                'defaultType': 'spot' if is_spot else 'future'
+                'defaultType': 'future' if is_future else 'spot'
             }
         })
         return exchange
@@ -55,3 +55,6 @@ class BinanceTrader(SuperTrader):
         except Exception as e:
             self.send_msg('check_system...FAILED', log_level='warning', slack=True)
             raise Exception(str(e))
+        
+    def get_cur_price(self, symbol):
+        symbol_price = self.exchange.fetch_ticker(symbol)
