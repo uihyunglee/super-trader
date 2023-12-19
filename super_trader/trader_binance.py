@@ -72,3 +72,15 @@ class BinanceTrader(SuperTrader):
         positions = self.exchange.fetch_positions(symbols=[symbol])
         amount = positions[0]['info']['positionAmt']  # 추후 여러 자산 투자 시 변경
         return float(amount)
+    
+    def send_market_order(self, symbol, qty):
+        side = 'buy' if qty > 0 else 'sell'
+        qty = abs(qty)
+        self.send_msg(f'send_market_order -> symbol: {symbol}, side: {side}, qty: {qty}')
+        order = self.exchange.create_order(
+            symbol=symbol,
+            type='market',
+            side=side,
+            amount=qty
+        )
+        return order
