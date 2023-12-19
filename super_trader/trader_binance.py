@@ -58,3 +58,6 @@ class BinanceTrader(SuperTrader):
         
     def get_cur_price(self, symbol):
         symbol_price = self.exchange.fetch_ticker(symbol)
+        cur_price = symbol_price['last']
+        return cur_price
+    
