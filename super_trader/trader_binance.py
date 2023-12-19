@@ -97,3 +97,9 @@ class BinanceTrader(SuperTrader):
             if len(self.exchange.fetch_open_orders(symbol)) == 0:
                 self.send_msg(f'check_order_completion...OK')
                 return True
+
+    def execute_order(self, symbol, qty):
+        order = self.send_market_order(symbol, qty)
+        order_info = self.get_order_info(order)
+        self.check_order_completion(symbol)
+        return order_info
