@@ -11,7 +11,7 @@ class BinanceTrader(SuperTrader):
     def __init__(self, is_future=False):
         super().__init__()
         self.is_future = is_future
-        self.exchange = self.get_binance_broker(self.is_future)
+        self.exchange = self.get_binance_broker()
         self.send_msg(f'set_binance_broker(is_future={self.is_future})...OK', slack=True)
         
     def get_binance_broker(self):
