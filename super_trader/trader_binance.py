@@ -98,6 +98,20 @@ class BinanceTrader(SuperTrader):
             self.send_msg(f'end_all_position...OK')
         return True
 
+    def cancel_open_order(self, symbol, order_id=None, all_order=False):
+        self.send_msg(
+            f"cancel_open_order -> symbol: {symbol}, {'all_order: '+str(all_order) if all else 'order_id: '+order_id}",
+            slack=True)
+        if all_order:
+            resp = self.exchange.cancel_all_orders(symbol=symbol)
+            if resp['code'] == '200':
+                self.send_msg(f"cancel_open_order...OK", slack=True)
+        else:
+            resp = self.exchange.cancel_order(id=order_id, symbol=symbol)
+            if resp['status'] == 'canceled':
+                self.send_msg(f"cancel_open_order...OK", slack=True)
+        return True
+
     @staticmethod
     def read_api_key():
         config_path = os.path.join(os.getcwd(), "config.json")
