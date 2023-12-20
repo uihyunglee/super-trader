@@ -70,26 +70,25 @@ class BinanceTrader(SuperTrader):
             side=side,
             amount=qty
         )
-        return order
-    
-    def get_order_info(self, order):
-        info_col = ['updateTime', 'orderId', 'type', 'side', 'symbol', 'avgPrice', 'price', 'origQty', 'executedQty']
-        info_lst = [ order['info'][col] for col in info_col]
-        self.send_msg(f'get_order_info -> {info_lst}')
-        return info_lst
-    
-    def check_order_completion(self, symbol):
+        return order['id']
+
+    def check_order_completion(self, symbol, order_id):
         while True:
             time.sleep(0.1)
-            if len(self.exchange.fetch_open_orders(symbol)) == 0:
+            order = self.exchange.fetchOrder(symbol=symbol, id=order_id)
+            if order['info']['status'] == 'FILLED':
                 self.send_msg(f'check_order_completion...OK')
-                return True
+                return order['info']
 
     def execute_order(self, symbol, qty):
-        order = self.send_market_order(symbol, qty)
-        order_info = self.get_order_info(order)
-        self.check_order_completion(symbol)
-        return order_info
+        order_id = self.send_market_order(symbol, qty)
+        order_info = self.check_order_completion(symbol, order_id)
+
+        info_col = ['time', 'updateTime', 'orderId', 'type', 'side', 'symbol',
+                    'price', 'avgPrice', 'origQty', 'executedQty']
+        info_lst = [order_info[col] for col in info_col]
+        self.send_msg(f'execute_order: {info_lst}')
+        return info_lst
     
     def end_all_position(self, symbol):
         prev_qty = self.get_holding_position(symbol)
