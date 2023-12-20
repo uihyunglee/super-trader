@@ -27,12 +27,14 @@ class BinanceTrader(SuperTrader):
         return exchange
     
     def check_market_open(self):
-        self.send_msg('check_market_open...OK', slack=True)  # The binance market is always opend.
+        self.send_msg('check_market_open...OK', slack=True)  # The binance market is always open.
+        return True
     
     def check_system(self):
         try:
             ccxt.binance().fetch_ticker('BTC/USDT')
             self.send_msg('check_system...OK', slack=True)
+            return True
         except Exception as e:
             self.send_msg('check_system...FAILED', log_level='warning', slack=True)
             raise Exception(str(e))
