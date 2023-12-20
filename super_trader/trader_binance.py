@@ -122,6 +122,16 @@ class BinanceTrader(SuperTrader):
         leverage = positions[0]['leverage']
         return leverage
 
+    def set_margin_mode(self, symbol, margin_mode):
+        self.send_msg(f"set_margin_mode -> symbol: {symbol}, margin_mode: {margin_mode}")
+        resp = self.exchange.set_margin_mode(marginMode=margin_mode, symbol=symbol)
+        if resp['code'] == 200:
+            self.send_msg("set_margin_mode...OK")
+            return True
+        elif resp['code'] == -4046:
+            self.send_msg(f"margin_mode is already {margin_mode}")
+            return False
+
     @staticmethod
     def read_api_key():
         config_path = os.path.join(os.getcwd(), "config.json")
