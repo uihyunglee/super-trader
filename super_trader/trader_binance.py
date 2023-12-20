@@ -13,7 +13,7 @@ class BinanceTrader(SuperTrader):
         self.is_future = is_future
         self.exchange = self.get_binance_broker()
         self.send_msg(f'set_binance_broker(is_future={self.is_future})...OK', slack=True)
-        
+
     def get_binance_broker(self):
         binance_info = self.read_api_key()
         exchange = ccxt.binance(config={
@@ -25,11 +25,11 @@ class BinanceTrader(SuperTrader):
             }
         })
         return exchange
-    
+
     def check_market_open(self):
         self.send_msg('check_market_open...OK', slack=True)  # The binance market is always open.
         return True
-    
+
     def check_system(self):
         try:
             ccxt.binance().fetch_ticker('BTC/USDT')
@@ -38,18 +38,18 @@ class BinanceTrader(SuperTrader):
         except Exception as e:
             self.send_msg('check_system...FAILED', log_level='warning', slack=True)
             raise Exception(str(e))
-        
+
     def get_cur_price(self, symbol):
         symbol_price = self.exchange.fetch_ticker(symbol)
         cur_price = symbol_price['last']
         return cur_price
-    
+
     def get_total_usdt(self):
         balance = self.exchange.fetch_balance(params={'type': 'future' if self.is_future else 'spot'})
         balance_usdt = balance['USDT']
         total_usdt = balance_usdt['total']
         return float(total_usdt)
-    
+
     def get_holding_position(self, symbol):
         positions = self.exchange.fetch_positions(symbols=[symbol])
         amount = positions[0]['info']['positionAmt']  # 추후 여러 자산 투자 시 변경
@@ -59,7 +59,7 @@ class BinanceTrader(SuperTrader):
         positions = self.exchange.fetch_positions(symbols=[symbol])
         unrealized_profit = positions[0]['info']['unRealizedProfit']
         return float(unrealized_profit)
-    
+
     def send_market_order(self, symbol, qty):
         side = 'buy' if qty > 0 else 'sell'
         qty = abs(qty)
@@ -89,7 +89,7 @@ class BinanceTrader(SuperTrader):
         info_lst = [order_info[col] for col in info_col]
         self.send_msg(f'execute_order: {info_lst}')
         return info_lst
-    
+
     def end_all_position(self, symbol):
         prev_qty = self.get_holding_position(symbol)
         self.send_msg(f'end_all_position -> symbol: {symbol}, prev_qty: {prev_qty}')
@@ -100,7 +100,7 @@ class BinanceTrader(SuperTrader):
 
     def cancel_open_order(self, symbol, order_id=None, all_order=False):
         self.send_msg(
-            f"cancel_open_order -> symbol: {symbol}, {'all_order: '+str(all_order) if all else 'order_id: '+order_id}",
+            f"cancel_open_order -> {'all_order: ' + str(all_order) if all_order else 'order_id: ' + order_id}",
             slack=True)
         if all_order:
             resp = self.exchange.cancel_all_orders(symbol=symbol)
@@ -117,7 +117,7 @@ class BinanceTrader(SuperTrader):
         self.send_msg("set_leverage...OK")
         return True
 
-    def get_lerverage(self, symbol):
+    def get_leverage(self, symbol):
         positions = self.exchange.fetch_positions(symbols=[symbol])
         leverage = positions[0]['leverage']
         return leverage
