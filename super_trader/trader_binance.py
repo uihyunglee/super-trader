@@ -110,7 +110,17 @@ class BinanceTrader(SuperTrader):
             resp = self.exchange.cancel_order(id=order_id, symbol=symbol)
             if resp['status'] == 'canceled':
                 self.send_msg(f"cancel_open_order...OK", slack=True)
+
+    def set_leverage(self, symbol, leverage):
+        self.send_msg(f"set_leverage -> symbol: {symbol}, leverage: {leverage}")
+        self.exchange.set_leverage(leverage, symbol)
+        self.send_msg("set_leverage...OK")
         return True
+
+    def get_lerverage(self, symbol):
+        positions = self.exchange.fetch_positions(symbols=[symbol])
+        leverage = positions[0]['leverage']
+        return leverage
 
     @staticmethod
     def read_api_key():
