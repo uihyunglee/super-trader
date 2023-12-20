@@ -17,7 +17,7 @@ class BinanceTrader(SuperTrader):
     def get_binance_broker(self):
         binance_info = self.read_api_key()
         exchange = ccxt.binance(config={
-            'apiKey': binance_info["api_key"], 
+            'apiKey': binance_info["api_key"],
             'secret': binance_info["secret"],
             'enableRateLimit': True,
             'options': {
@@ -54,6 +54,11 @@ class BinanceTrader(SuperTrader):
         positions = self.exchange.fetch_positions(symbols=[symbol])
         amount = positions[0]['info']['positionAmt']  # 추후 여러 자산 투자 시 변경
         return float(amount)
+
+    def get_unrealized_profit(self, symbol):
+        positions = self.exchange.fetch_positions(symbols=[symbol])
+        unrealized_profit = positions[0]['info']['unRealizedProfit']
+        return float(unrealized_profit)
     
     def send_market_order(self, symbol, qty):
         side = 'buy' if qty > 0 else 'sell'
