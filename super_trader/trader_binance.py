@@ -92,10 +92,11 @@ class BinanceTrader(SuperTrader):
     
     def end_all_position(self, symbol):
         prev_qty = self.get_holding_position(symbol)
-        self.send_msg(f'end_all_position -> prev_qty: {prev_qty}')
+        self.send_msg(f'end_all_position -> symbol: {symbol}, prev_qty: {prev_qty}')
         if prev_qty != 0:
-            self.execute_order(self, symbol, -prev_qty)
-        self.send_msg(f'end_all_position...OK')
+            self.execute_order(symbol, -prev_qty)
+            self.send_msg(f'end_all_position...OK')
+        return True
 
     @staticmethod
     def read_api_key():
