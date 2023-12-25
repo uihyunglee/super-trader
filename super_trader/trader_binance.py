@@ -78,9 +78,10 @@ class BinanceTrader(SuperTrader):
                 order = self.exchange.fetchOrder(symbol=symbol, id=order_id)
             except Exception as e:
                 self.send_msg(str(e), log_level='error')
-            if order['info']['status'] == 'FILLED':
-                self.send_msg(f'check_order_completion...OK')
-                return order['info']
+            else:
+                if order['info']['status'] == 'FILLED':
+                    self.send_msg(f'check_order_completion...OK')
+                    return order['info']
             time.sleep(0.01)
 
     def execute_order(self, symbol, qty):
