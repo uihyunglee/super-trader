@@ -74,11 +74,14 @@ class BinanceTrader(SuperTrader):
 
     def check_order_completion(self, symbol, order_id):
         while True:
-            time.sleep(0.1)
-            order = self.exchange.fetchOrder(symbol=symbol, id=order_id)
+            try:
+                order = self.exchange.fetchOrder(symbol=symbol, id=order_id)
+            except Exception as e:
+                self.send_msg(str(e), log_level='error')
             if order['info']['status'] == 'FILLED':
                 self.send_msg(f'check_order_completion...OK')
                 return order['info']
+            time.sleep(0.01)
 
     def execute_order(self, symbol, qty):
         order_id = self.send_market_order(symbol, qty)
