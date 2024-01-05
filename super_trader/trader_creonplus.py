@@ -16,12 +16,13 @@ class CreonPlusTrader(SuperTrader):
     cpBalance = win32com.client.Dispatch('CpTrade.CpTd6033')
     cpCash = win32com.client.Dispatch('CpTrade.CpTdNew5331A')
     cpOrder = win32com.client.Dispatch('CpTrade.CpTd0311')
+    cpOrderHist = win32com.client.Dispatch('CpTrade.CpTd5341')
     
     def __init__(self):
-        super().__init__()
         self.cpTdUtil.TradeInit()
         self.acc = self.cpTdUtil.AccountNumber[0]
         self.accFlag = self.cpTdUtil.GoodsList(self.acc, 1)
+        super().__init__()
         
     def check_system(self):
         if not ctypes.windll.shell32.IsUserAnAdmin():
@@ -202,3 +203,24 @@ class CreonPlusTrader(SuperTrader):
         while self.get_stock_balance('all'):
             time.sleep(1)
         self.send_msg('Sell all holding stocks...OK', slack=True)
+
+    def get_today_order_history(self):
+        self.cpTdUtil.TradeInit()
+        self.cpOrderHist.SetInputValue(0, self.acc)
+        self.cpOrderHist.SetInputValue(1, self.accFlag[0])
+        self.cpOrderHist.SetInputValue(4, '0')
+        self.cpOrderHist.SetInputValue(5, 20)
+        self.cpOrderHist.BlockRequest()
+
+        cnt = self.cpOrderHist.GetHeaderValue(6)
+
+        for i in range(cnt):
+            code = self.cpOrderHist.GetDataValue(3, i)
+            prc_type = self.cpOrderHist.GetDataValue(6, i)  # 01: 보통, 03: 시장가
+            order_qty = self.cpOrderHist.GetDataValue(7, i)
+            exec_qty = self.cpOrderHist.GetDataValue(10, i)
+            order_prc = self.cpOrderHist.GetDataValue(8, i)  # 0: 시장가
+            exec_prc = self.cpOrderHist.GetDataValue(11, i)
+            order_type = self.cpOrderHist.GetDataValue(35, i)  # 1:매도, 2: 매수
+
+            self.send_msg(f"{code}, {prc_type}, {order_qty}, {exec_qty}, {order_prc}, {exec_prc}, {order_type}")
