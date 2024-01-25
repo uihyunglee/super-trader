@@ -1,6 +1,9 @@
-from abc import ABCMeta, abstractmethod
-import json, sys
+import json
+import sys
+import threading
 from datetime import datetime as dt
+from queue import Queue
+from abc import ABCMeta, abstractmethod
 
 import requests
 from sl4p import *
@@ -30,7 +33,7 @@ class SuperTrader(metaclass=ABCMeta):
         logger = sl4p.getLogger(__file__, cfg=log_cfg)
         logger.info("Start Trading with SL4P Logging!")
 
-        log = {}
+        log = dict()
         log['debug'] = logger.debug
         log['info'] = logger.info
         log['warning'] = logger.warning
@@ -44,25 +47,44 @@ class SuperTrader(metaclass=ABCMeta):
         slack_info = _config['slack']
         self.token = slack_info['token']
         self.channel = slack_info['channel']
+
+        self.slack_queue = Queue()
+        self.evt = threading.Event()
+        self.slack_th = threading.Thread(target=self.slack_sender, daemon=True)
+        self.slack_th.start()
         self.send_msg('set_slack...OK')
         return True
 
     def send_msg(self, msg, log_level='info', slack=False):
         self.log[log_level](msg)
         if slack:
-            cur_time = dt.now().strftime('%Y-%m-%d %H:%M:%S')
-            try:
-                slack_res = requests.post(
-                    url="https://slack.com/api/chat.postMessage",
-                    headers={"Authorization": "Bearer "+ self.token},
-                    data={"channel": self.channel, "text": f'[{cur_time}] {msg}'}
-                )
-            except:
-                msg = 'Slack message sending failed. Please check info_slack.'
-                self.send_msg(msg, log_level='warning', slack=False)
-                
+            self.slack_queue.put(msg)
+            self.evt.set()
+
+    def slack_sender(self):
+        self.evt.wait()
+        while True:
+            msg = self.slack_queue.get(timeout=1)
+            self.send_slack(msg)
+            if self.slack_queue.empty():
+                self.evt.clear()
+                self.evt.wait()
+
+    def send_slack(self, msg):
+        cur_time = dt.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            slack_res = requests.post(
+                url="https://slack.com/api/chat.postMessage",
+                headers={"Authorization": "Bearer " + self.token},
+                data={"channel": self.channel, "text": f'[{cur_time}] {msg}'}
+            )
+        except:
+            msg = 'Slack message sending failed. Please check info_slack.'
+            self.send_msg(msg, log_level='warning', slack=False)
+
     def exit_system(self):
         self.send_msg('Exit the program.', log_level='info', slack=True)
+        del self.slack_th
         sys.exit(0)
         
     def check_market_open(self):
