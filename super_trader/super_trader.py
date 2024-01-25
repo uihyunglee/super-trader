@@ -89,7 +89,7 @@ class SuperTrader(metaclass=ABCMeta):
         
     def check_market_open(self):
         today = dt.now()
-        is_weekend = today.weekday() in [5,6]
+        is_weekend = today.weekday() in [5, 6]
         
         year = str(today.year)
         with open("config.json", "r") as json_file:
